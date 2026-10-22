@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Suppress unavoidable WebSocket/HMR noise in AI Studio environment -->
+    <script>
+      (function() {
+        const suppressStrings = ['WebSocket', 'HMR', 'hot reload', 'vite:client', 'closed without opened'];
+        const isSuppressed = (arg) => {
+          if (!arg) return false;
+          const str = typeof arg === 'string' ? arg : (arg.message || (typeof arg.toString === 'function' ? arg.toString() : ''));
+          return suppressStrings.some(s => str.includes(s));
+        };
+        const originalWarn = console.warn;
+        const originalError = console.error;
+        console.warn = function(...args) {
+          if (args.some(isSuppressed)) return;
+          originalWarn.apply(console, args);
+        };
+        console.error = function(...args) {
+          if (args.some(isSuppressed)) return;
+          originalError.apply(console, args);
+        };
+        window.addEventListener('error', function(event) {
+          if (isSuppressed(event.error) || isSuppressed(event.message)) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+          }
+        }, true);
+        window.addEventListener('unhandledrejection', function(event) {
+          if (isSuppressed(event.reason)) {
+            event.stopImmediatePropagation();
+            event.preventDefault();
+          }
+        }, true);
+        window.addEventListener('vite:preloadError', function() {
+          window.location.reload();
+        });
+        
+        // Totally disable WebSocket for Vite's HMR to prevent noise
+        const OriginalWS = window.WebSocket;
+        class MockWS {
+          constructor(url, protocols) {
+            this.url = url;
+            this.protocols = protocols;
+            this.readyState = 0; // CONNECTING
+            this.bufferedAmount = 0;
+            this.extensions = '';
+            this.protocol = '';
+            this.binaryType = 'blob';
+            this.onopen = null;
+            this.onmessage = null;
+            this.onerror = null;
+            this.onclose = null;
+            this._listeners = {};
+            
+            if (typeof url === 'string' && (url.includes('vite') || url.includes('hmr'))) {
+              console.log('Vite HMR WebSocket intercepted and silenced');
+              this.readyState = 1; // Start in OPEN state to prevent "closed without opened" error
+              setTimeout(() => {
+                const event = { type: 'open', target: this };
+                if (this.onopen) try { this.onopen(event); } catch(e) {}
+                if (this._listeners['open']) {
+                  this._listeners['open'].forEach(l => { try { l(event); } catch(e) {} });
+                }
+              }, 0);
+            } else {
+              return new OriginalWS(url, protocols);
+            }
+          }
+          addEventListener(type, listener) {
+            if (!this._listeners[type]) this._listeners[type] = [];
+            this._listeners[type].push(listener);
+          }
+          removeEventListener(type, listener) {
+            if (!this._listeners[type]) return;
+            this._listeners[type] = this._listeners[type].filter(l => l !== listener);
+          }
+          send() {}
+          close() {
+            this.readyState = 3; // CLOSED
+            const event = { type: 'close', code: 1000, reason: 'Silenced', wasClean: true, target: this };
+            if (this.onclose) try { this.onclose(event); } catch(e) {}
+            if (this._listeners['close']) {
+              this._listeners['close'].forEach(l => { try { l(event); } catch(e) {} });
+            }
+          }
+          dispatchEvent() { return true; }
+        }
+        window.WebSocket = MockWS;
+        window.WebSocket.prototype = OriginalWS.prototype;
+
+        // Suppress Vite's error overlay
+        const style = document.createElement('style');
+        style.innerHTML = 'vite-error-overlay { display: none !important; }';
+        document.head.appendChild(style);
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Fancy Bazaar – Premium Fashion & Lifestyle Store</title>
+    <meta name="description" content="Shop the latest trends in fashion and lifestyle at Fancy Bazaar. Enjoy secure UPI payments, real-time order tracking, and fast delivery." />
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#4f46e5" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="FancyBazaar" />
+    <!-- PWA icons removed until generated -->
+    
+    <!-- OpenGraph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://fancy-bazaar.com/" />
+    <meta property="og:title" content="Fancy Bazaar – Premium Fashion & Lifestyle Store" />
+    <meta property="og:description" content="Shop the latest trends in fashion and lifestyle at Fancy Bazaar. Enjoy secure UPI payments, real-time order tracking, and fast delivery." />
+    <meta property="og:image" content="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://fancy-bazaar.com/" />
+    <meta name="twitter:title" content="Fancy Bazaar – Premium Fashion & Lifestyle Store" />
+    <meta name="twitter:description" content="Shop the latest trends in fashion and lifestyle at Fancy Bazaar. Enjoy secure UPI payments, real-time order tracking, and fast delivery." />
+    <meta name="twitter:image" content="https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=1200&auto=format&fit=crop" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ECommercePlatform",
+      "name": "Fancy Bazaar",
+      "description": "Premium Fashion and Lifestyle Store",
+      "url": "https://fancy-bazaar.com/",
+      "logo": "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=200&auto=format&fit=crop",
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "INR"
+      }
+    }
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

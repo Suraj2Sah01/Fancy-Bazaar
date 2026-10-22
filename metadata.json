@@ -1,0 +1,8 @@
+{
+  "name": "Fancy Bazaar - Premium Fashion & Lifestyle Store",
+  "description": "Discover high-quality sarees, kurtis, men's fashion, and home decor at Fancy Bazaar. Best prices, secure UPI payments, and fast delivery across India.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

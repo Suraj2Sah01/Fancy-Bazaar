@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    color-scheme: light;
+    scroll-behavior: smooth;
+  }
+  :root.dark {
+    color-scheme: dark;
+  }
+  body {
+    -webkit-tap-highlight-color: transparent;
+    @apply antialiased transition-colors duration-300 text-gray-900 bg-white dark:text-gray-100 dark:bg-gray-950;
+  }
+}
+
+/* Force Tailwind v4 to use the .dark class instead of media queries */
+/* This is a common way in v4 to handle class-based dark mode without a config file */
+@variant dark (&:where(.dark, .dark *));
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
